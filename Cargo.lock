@@ -144,6 +144,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "diginet-scraper"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "reqwest",
+ "scraper",
+ "tokio",
+]
+
+[[package]]
 name = "dtoa"
 version = "0.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1098,16 +1108,6 @@ name = "siphasher"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fa8f3741c7372e75519bd9346068370c9cdaabcc1f9599cbcf2a2719352286b7"
-
-[[package]]
-name = "skelbiu-scraper-rs"
-version = "0.1.0"
-dependencies = [
- "clap",
- "reqwest",
- "scraper",
- "tokio",
-]
 
 [[package]]
 name = "slab"

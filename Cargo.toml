@@ -1,5 +1,5 @@
 [package]
-name = "skelbiu-scraper-rs"
+name = "diginet-scraper"
 version = "0.1.0"
 authors = ["Zexa <zexa@cock.li>"]
 edition = "2018"
