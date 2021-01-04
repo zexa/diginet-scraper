@@ -1,13 +1,10 @@
 extern crate clap;
 extern crate reqwest;
-
-#[macro_use]
 extern crate tokio;
 
 mod aruodas;
 
 use clap::{Arg, App, AppSettings};
-use tokio::runtime::Runtime;
 
 #[tokio::main]
 async fn main() -> Result<(), reqwest::Error> {
@@ -23,7 +20,9 @@ async fn main() -> Result<(), reqwest::Error> {
         // I.e. https://www.aruodas.lt/butu-nuoma/vilniuje/?FPriceMin=200&FPriceMax=250
         let url = matches.value_of("url").unwrap().to_string();
         let scraper = crate::aruodas::Scraper::new();
-        scraper.scrape(url).await;
+        for listing in scraper.scrape(url).await {
+            println!("{:?}", listing)
+        }
     }
 
     Ok(())

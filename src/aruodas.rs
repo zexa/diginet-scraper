@@ -1,6 +1,7 @@
 use std::collections::HashMap;
-use scraper::ElementRef;
+use scraper::{ElementRef, Selector};
 
+#[derive(Debug)]
 pub struct Listing {
     url: String,
     price: String,
@@ -18,8 +19,9 @@ impl Scraper {
     pub async fn scrape(&self, url: String) -> Vec<Listing> {
         let mut next_listing_urls = Vec::<String>::new();
         let mut next_page_url = Some(url);
-        while let Some(page_url) = next_page_url.clone() {
-            let mut scrape_page = self.scrape_page(page_url).await;
+        let mut scrape_page: (Option<String>, Vec<String>);
+        while let Some(page_url) = next_page_url {
+            scrape_page = self.scrape_page(page_url).await;
             next_page_url = scrape_page.0;
             next_listing_urls.append(&mut scrape_page.1);
             break;
@@ -27,8 +29,7 @@ impl Scraper {
 
         let mut listings = Vec::<Listing>::new();
         while let Some(next_listing_url) = next_listing_urls.pop() {
-            let mut scrape_listing = self.scrape_listing(next_listing_url).await;
-            listings.push(scrape_listing);
+            listings.push(self.scrape_listing(next_listing_url).await);
         };
 
         listings
@@ -49,12 +50,7 @@ impl Scraper {
 
         println!("Parsing page {}", url);
 
-        let body = reqwest::get(&url)
-            .await
-            .unwrap()
-            .text()
-            .await
-            .unwrap();
+        let body = reqwest::get(&url).await.unwrap().text().await.unwrap();
         let document = scraper::Html::parse_document(body.as_str());
 
         let next_page_url = match document.select(&page_selector).next() {
@@ -73,6 +69,7 @@ impl Scraper {
                 None => {continue;},
                 Some(listing_url) => {
                     listing_urls.push(listing_url.to_string());
+                    break;
                 },
             }
         };
@@ -85,38 +82,22 @@ impl Scraper {
     pub async fn scrape_listing(&self, url: String) -> Listing {
         // TODO: Keep these for as long as the struct lives, don't reinitialize it every time
         // scrape_listing is called
-        let price_selector = scraper::Selector::parse("body > div.main > div.content > div.main-content > div.obj-cont > div.price-block > div > span.price-eur")
-            .unwrap();
         let table_selector = scraper::Selector::parse("body > div.main > div.content > div.main-content > div.obj-cont > dl")
             .unwrap();
 
         println!("Parsing url {}", url);
 
-        let body = reqwest::get(&url)
-            .await
-            .unwrap()
-            .text()
-            .await
-            .unwrap();
+        let body = reqwest::get(&url).await.unwrap().text().await.unwrap();
         let document = scraper::Html::parse_document(body.as_str());
 
-        let price = document
-            .select(&price_selector)
-            .next()
-            .unwrap()
-            .text()
-            .collect::<String>()
-            .replace("\n", "")
-            .trim()
-            .to_string();
         let obj_details = self.parse_obj_details(
             document.select(&table_selector).next().unwrap());
 
         // return struct
         Listing {
             url: url.clone(),
-            price,
-            area: obj_details.get("Kaina mėn.:").unwrap().clone(),
+            price: obj_details.get("Kaina mėn.:").unwrap().replace(" €", ""),
+            area: obj_details.get("Plotas:").unwrap().replace(" m²", ""),
             location: "".to_string()
         }
     }
@@ -125,31 +106,34 @@ impl Scraper {
     fn parse_obj_details(&self, obj_details: ElementRef) -> HashMap<String, String> {
         // TODO: Keep these for as long as the struct lives, don't reinitialize it every time
         // parse_obj_details is called
-        let dt_selector = scraper::Selector::parse("dt")
-            .unwrap();
-        let dd_selector = scraper::Selector::parse("dd")
-            .unwrap();
+        let dt_selector = scraper::Selector::parse("dt").unwrap();
+        let dd_selector = scraper::Selector::parse("dd").unwrap();
 
-        let mut dts = Vec::<String>::new();
-        for dt in obj_details.select(&dt_selector) {
-            dts.push(dt.text().collect::<String>().replace("\n", "").trim().to_string());
-        };
-
-        let mut dds = Vec::<String>::new();
-        for dd in obj_details.select(&dd_selector) {
-            dds.push(dd.text().collect::<String>().replace("\n", "").trim().to_string());
-        };
-
+        let dts = self.get_obj_detail_elements(obj_details, &dt_selector);
+        let dds = self.get_obj_detail_elements(obj_details, &dd_selector);
         let mut obj_hash = HashMap::<String, String>::new();
         for dt in dts.iter().enumerate() {
             match dds.iter().nth(dt.0) {
-                None => {continue;},
-                Some(dd) => {
-                    obj_hash.insert(dt.1.clone(), dd.clone());
-                },
+                None => continue,
+                Some(dd) => obj_hash.insert(dt.1.clone(), dd.clone()),
             };
-        }
+        };
 
         obj_hash
+    }
+
+    fn get_obj_detail_elements(&self, element: ElementRef, selector: &Selector) -> Vec<String> {
+        let mut result = Vec::<String>::new();
+        for el in element.select(selector) {
+            result.push(
+                el
+                    .text()
+                    .collect::<String>()
+                    .replace("\n", "")
+                    .trim()
+                    .to_string());
+        };
+
+        result
     }
 }
