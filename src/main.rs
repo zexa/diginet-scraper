@@ -8,11 +8,12 @@ use clap::{Arg, App, AppSettings};
 
 #[tokio::main]
 async fn main() -> Result<(), reqwest::Error> {
+    let version = env!("CARGO_PKG_VERSION");
     let matches = App::new(env!("CARGO_PKG_NAME"))
         .about("Scrapes diginet.lt (autoplius.lt, aruodas.lt, skelbiu.lt, cvbankas.lt, paslaugos.lt, kainos.lt) listings")
-        .version(env!("CARGO_PKG_VERSION"))
+        .version(version)
         .subcommand(App::new("aruodas")
-            .version(env!("CARGO_PKG_VERSION"))
+            .version(version)
             .about("Scrapes aruodas listings")
             .arg(Arg::with_name("url")
                 .takes_value(true))
