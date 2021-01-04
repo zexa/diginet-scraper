@@ -23,3 +23,11 @@ SUBCOMMANDS:
 ```
 
 ## Usage aruodas
+1. Go to aruodas.lt
+2. Use their search to filter the listings
+3. Copy {url}
+4. Run `digine-scraper aruodas {url}`
+
+```
+diginet-scraper aruodas https://www.aruodas.lt/butu-nuoma/vilniuje/\?FPriceMin\=200\&FPriceMax\=250
+```
