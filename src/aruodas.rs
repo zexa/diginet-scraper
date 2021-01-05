@@ -1,12 +1,13 @@
 use std::collections::HashMap;
 use scraper::{ElementRef, Selector};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Listing {
     url: String,
     price: String,
     area: String,
     location: String,
+    price_per_area: f32,
 }
 
 pub struct Scraper;
@@ -16,7 +17,7 @@ impl Scraper {
         Self
     }
 
-    pub async fn scrape(&self, url: String) -> Vec<Listing> {
+    pub async fn scrape(&self, url: String, limit: Option<usize>) -> Vec<Listing> {
         let mut next_listing_urls = Vec::<String>::new();
         let mut next_page_url = Some(url);
         let mut scrape_page: (Option<String>, Vec<String>);
@@ -28,8 +29,19 @@ impl Scraper {
         };
 
         let mut listings = Vec::<Listing>::new();
+        let mut parsed = 0;
         while let Some(next_listing_url) = next_listing_urls.pop() {
             listings.push(self.scrape_listing(next_listing_url).await);
+            parsed += 1;
+            match limit {
+                None => {},
+                Some(lim) => {
+                    if parsed >= lim {
+                        println!("Reached limit: {}", lim);
+                        break;
+                    }
+                },
+            }
         };
 
         listings
@@ -69,7 +81,6 @@ impl Scraper {
                 None => {continue;},
                 Some(listing_url) => {
                     listing_urls.push(listing_url.to_string());
-                    break;
                 },
             }
         };
@@ -93,12 +104,16 @@ impl Scraper {
         let obj_details = self.parse_obj_details(
             document.select(&table_selector).next().unwrap());
 
-        // return struct
+        let price = obj_details.get("Kaina mėn.:").unwrap().replace(" €", "");
+        let area = obj_details.get("Plotas:").unwrap().replace(" m²", "");
+        let price_per_area = area.parse::<f32>().unwrap() / price.parse::<f32>().unwrap();
+
         Listing {
             url: url.clone(),
-            price: obj_details.get("Kaina mėn.:").unwrap().replace(" €", ""),
-            area: obj_details.get("Plotas:").unwrap().replace(" m²", ""),
-            location: "".to_string()
+            price,
+            area,
+            location: "".to_string(),
+            price_per_area,
         }
     }
 
@@ -136,4 +151,23 @@ impl Scraper {
 
         result
     }
+}
+
+pub fn sort_by_price_to_area_ratio(mut listings: Vec<Listing>) -> Vec<Listing> {
+    let mut swapped = true;
+    let mut current: Listing;
+    let mut previous: Listing;
+    while swapped {
+        for i in 1..listings.len() {
+            swapped = false;
+            current = listings[i].clone();
+            previous = listings[i -1].clone();
+            if current.price_per_area > previous.price_per_area {
+                swapped = true;
+                listings.swap(i - 1, i);
+            }
+        }
+    }
+
+    listings
 }

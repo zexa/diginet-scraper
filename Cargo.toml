@@ -1,6 +1,6 @@
 [package]
 name = "diginet-scraper"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Zexa <zexa@cock.li>"]
 edition = "2018"
 
