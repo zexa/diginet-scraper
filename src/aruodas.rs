@@ -25,6 +25,9 @@ impl Scraper {
             scrape_page = self.scrape_page(page_url).await;
             next_page_url = scrape_page.0;
             next_listing_urls.append(&mut scrape_page.1);
+
+            // TODO: Next page urls come without domain.
+            // Until that situation is handled, lets not remove this break
             break;
         };
 
