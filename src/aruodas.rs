@@ -118,8 +118,8 @@ impl Scraper {
 
         let price = obj_details.get("Kaina mėn.:").unwrap().replace(" €", "").replace(",", ".");
         let area = obj_details.get("Plotas:").unwrap().replace(" m²", "").replace(",", ".");
-        let price_per_area = area.parse::<f32>().expect(&format!("Could not parse area to floating point: {}", area))
-            / price.parse::<f32>().expect(&format!("Could not parse price to floating point: {}", price));
+        let price_per_area = price.parse::<f32>().expect(&format!("Could not parse price to floating point: {}", price))
+            / area.parse::<f32>().expect(&format!("Could not parse area to floating point: {}", area));
 
         Listing {
             url: url.clone(),
@@ -166,16 +166,12 @@ impl Scraper {
     }
 }
 
-pub fn sort_by_price_to_area_ratio(mut listings: Vec<Listing>) -> Vec<Listing> {
+pub fn sort_by_price_per_area(mut listings: Vec<Listing>) -> Vec<Listing> {
     let mut swapped = true;
-    let mut current: Listing;
-    let mut previous: Listing;
     while swapped {
+        swapped = false;
         for i in 1..listings.len() {
-            swapped = false;
-            current = listings[i].clone();
-            previous = listings[i -1].clone();
-            if current.price_per_area > previous.price_per_area {
+            if listings[i].price_per_area > listings[i -1].price_per_area {
                 swapped = true;
                 listings.swap(i - 1, i);
             }

@@ -19,10 +19,10 @@ async fn main() -> Result<(), reqwest::Error> {
             .about("Scrapes aruodas listings")
             .arg(Arg::with_name("url")
                 .takes_value(true))
-            .arg(Arg::with_name("sort-by-price-to-area-ratio")
-                .short("s")
-                .long("sort-by-price-to-area-ration")
-                .help("Sorts by price to area ratio")
+            .arg(Arg::with_name("sort_by_ratio")
+                .short("sbr")
+                .long("sort-by-ratio")
+                .help("Sorts by price per area ratio")
                 .required(false)
                 .takes_value(false))
             .arg(Arg::with_name("limit")
@@ -35,14 +35,14 @@ async fn main() -> Result<(), reqwest::Error> {
         .setting(AppSettings::ArgRequiredElseHelp)
         .get_matches();
 
-    if let Some(matches) = matches.subcommand_matches("aruodas") {
+    if let Some(aruodas_matches) = matches.subcommand_matches("aruodas") {
         // I.e. https://www.aruodas.lt/butu-nuoma/vilniuje/?FPriceMin=200&FPriceMax=250
-        let url = matches.value_of("url").unwrap().to_string();
+        let url = aruodas_matches.value_of("url").unwrap().to_string();
         println!("Initial page provided: {}", url);
 
         let scraper = crate::aruodas::Scraper::new();
 
-        let limit: Option<usize> = match matches.value_of("limit") {
+        let limit: Option<usize> = match aruodas_matches.value_of("limit") {
             None => None,
             Some(lim) => Some(lim.parse::<usize>().unwrap()),
         };
@@ -51,10 +51,9 @@ async fn main() -> Result<(), reqwest::Error> {
 
         let mut listings = scraper.scrape(url, limit).await;
 
-        // TODO: There's a bug here, this doesn't catch the sort ever
-        if let Some(_) = matches.value_of("sort-by-price-to-area-ratio") {
-            println!("Sorting by area per price");
-            listings = crate::aruodas::sort_by_price_to_area_ratio(listings);
+        if aruodas_matches.is_present("sort_by_ratio") {
+            println!("Sorting by price per area");
+            listings = crate::aruodas::sort_by_price_per_area(listings);
         };
 
         for listing in listings {
