@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use scraper::{ElementRef, Selector};
+use url::Url;
 
 #[derive(Debug, Clone)]
 pub struct Listing {
@@ -19,16 +20,24 @@ impl Scraper {
 
     pub async fn scrape(&self, url: String, limit: Option<usize>) -> Vec<Listing> {
         let mut next_listing_urls = Vec::<String>::new();
-        let mut next_page_url = Some(url);
+        let mut next_page_url = Some(Url::parse(&url).unwrap());
         let mut scrape_page: (Option<String>, Vec<String>);
         while let Some(page_url) = next_page_url {
-            scrape_page = self.scrape_page(page_url).await;
-            next_page_url = scrape_page.0;
+            scrape_page = self.scrape_page(page_url.to_string()).await;
+            next_page_url = match scrape_page.0 {
+                None => None,
+                Some(url) => Some(page_url.join(&url).unwrap()),
+            };
             next_listing_urls.append(&mut scrape_page.1);
-
-            // TODO: Next page urls come without domain.
-            // Until that situation is handled, lets not remove this break
-            break;
+            match limit {
+                None => {},
+                Some(lim) => {
+                    if next_listing_urls.len() >= lim {
+                        println!("Stopping page scraping due to reached limit: {}", lim);
+                        break;
+                    }
+                },
+            };
         };
 
         let mut listings = Vec::<Listing>::new();
@@ -40,7 +49,7 @@ impl Scraper {
                 None => {},
                 Some(lim) => {
                     if parsed >= lim {
-                        println!("Reached limit: {}", lim);
+                        println!("Stopping listing scraping due to reached limit: {}", lim);
                         break;
                     }
                 },
@@ -107,9 +116,10 @@ impl Scraper {
         let obj_details = self.parse_obj_details(
             document.select(&table_selector).next().unwrap());
 
-        let price = obj_details.get("Kaina mėn.:").unwrap().replace(" €", "");
-        let area = obj_details.get("Plotas:").unwrap().replace(" m²", "");
-        let price_per_area = area.parse::<f32>().unwrap() / price.parse::<f32>().unwrap();
+        let price = obj_details.get("Kaina mėn.:").unwrap().replace(" €", "").replace(",", ".");
+        let area = obj_details.get("Plotas:").unwrap().replace(" m²", "").replace(",", ".");
+        let price_per_area = area.parse::<f32>().expect(&format!("Could not parse area to floating point: {}", area))
+            / price.parse::<f32>().expect(&format!("Could not parse price to floating point: {}", price));
 
         Listing {
             url: url.clone(),

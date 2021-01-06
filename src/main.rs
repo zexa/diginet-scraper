@@ -1,6 +1,8 @@
 extern crate clap;
 extern crate reqwest;
 extern crate tokio;
+extern crate url;
+extern crate scraper;
 
 mod aruodas;
 
