@@ -52,6 +52,7 @@ async fn main() -> Result<(), DiginetError> {
                 .short("l")
                 .long("limit")
                 .help("Limits the amount of listings the scraper will scan for")
+                .takes_value(true)
                 .required(false))
             .setting(AppSettings::ArgRequiredElseHelp))
         .setting(AppSettings::ArgRequiredElseHelp)
@@ -63,23 +64,17 @@ async fn main() -> Result<(), DiginetError> {
         // I.e. https://www.aruodas.lt/butu-nuoma/vilniuje/?FPriceMin=200&FPriceMax=250
         let url = aruodas_matches.value_of("url").unwrap().to_string();
         println!("Initial page provided: {}", url);
-
         let scraper = crate::aruodas::AruodasScraper::new();
-
         let limit: Option<usize> = match aruodas_matches.value_of("limit") {
             None => None,
             Some(lim) => Some(lim.parse::<usize>().unwrap()),
         };
-
         println!("Order limit specified: {:?}", limit);
-
         let mut listings = scraper.scrape(url, limit).await;
-
         if aruodas_matches.is_present("sort_by_ratio") {
             println!("Sorting by price per area");
             listings = crate::aruodas::sort_by_price_per_area(listings);
         };
-
         for listing in listings {
             println!("{:?}", listing)
         }
@@ -93,7 +88,8 @@ async fn main() -> Result<(), DiginetError> {
             Some(lim) => Some(lim.parse::<usize>().unwrap()),
         };
         let scraper = cvbankas::CvBankasScraper {};
-        scraper.scrape(url, limit).await?;
+        let result = scraper.scrape(url, limit).await?;
+        scraper.output_listings(result);
     }
 
     Ok(())
