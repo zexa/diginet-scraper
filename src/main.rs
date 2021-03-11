@@ -1,21 +1,33 @@
+#![feature(try_trait)]
+
 extern crate clap;
 extern crate reqwest;
+extern crate scraper;
 extern crate tokio;
 extern crate url;
-extern crate scraper;
+#[macro_use]
+extern crate async_stream;
+#[macro_use]
+extern crate log;
 
 mod aruodas;
+mod cvbankas;
+mod error;
 
-use clap::{Arg, App, AppSettings};
+use crate::error::DiginetError;
+use clap::{App, AppSettings, Arg};
+use log::LevelFilter;
+use simple_logger::SimpleLogger;
+use std::str::FromStr;
+use url::Url;
 
 #[tokio::main]
-async fn main() -> Result<(), reqwest::Error> {
+async fn main() -> Result<(), DiginetError> {
     let version = env!("CARGO_PKG_VERSION");
     let matches = App::new(env!("CARGO_PKG_NAME"))
         .about("Scrapes diginet.lt (autoplius.lt, aruodas.lt, skelbiu.lt, cvbankas.lt, paslaugos.lt, kainos.lt) listings")
         .version(version)
         .subcommand(App::new("aruodas")
-            .version(version)
             .about("Scrapes aruodas listings")
             .arg(Arg::with_name("url")
                 .takes_value(true))
@@ -32,15 +44,27 @@ async fn main() -> Result<(), reqwest::Error> {
                 .takes_value(true)
                 .required(false))
             .setting(AppSettings::ArgRequiredElseHelp))
+        .subcommand(App::new("cvbankas")
+            .about("Scrapes cvbankas listings")
+            .arg(Arg::with_name("url")
+                .takes_value(true))
+            .arg(Arg::with_name("limit")
+                .short("l")
+                .long("limit")
+                .help("Limits the amount of listings the scraper will scan for")
+                .required(false))
+            .setting(AppSettings::ArgRequiredElseHelp))
         .setting(AppSettings::ArgRequiredElseHelp)
         .get_matches();
+
+    SimpleLogger::new().with_level(LevelFilter::Info).init()?;
 
     if let Some(aruodas_matches) = matches.subcommand_matches("aruodas") {
         // I.e. https://www.aruodas.lt/butu-nuoma/vilniuje/?FPriceMin=200&FPriceMax=250
         let url = aruodas_matches.value_of("url").unwrap().to_string();
         println!("Initial page provided: {}", url);
 
-        let scraper = crate::aruodas::Scraper::new();
+        let scraper = crate::aruodas::AruodasScraper::new();
 
         let limit: Option<usize> = match aruodas_matches.value_of("limit") {
             None => None,
@@ -59,6 +83,17 @@ async fn main() -> Result<(), reqwest::Error> {
         for listing in listings {
             println!("{:?}", listing)
         }
+    }
+
+    if let Some(cvbankas_matches) = matches.subcommand_matches("cvbankas") {
+        let url = Url::from_str(cvbankas_matches.value_of("url")?)?;
+        println!("Initial page provided: {}", url);
+        let limit: Option<usize> = match cvbankas_matches.value_of("limit") {
+            None => None,
+            Some(lim) => Some(lim.parse::<usize>().unwrap()),
+        };
+        let scraper = cvbankas::CvBankasScraper {};
+        scraper.scrape(url, limit).await?;
     }
 
     Ok(())

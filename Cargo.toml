@@ -12,3 +12,7 @@ reqwest = "0.10.10"
 tokio = { version = "0.2", features = ["full"] }
 scraper = "0.12.0"
 url = "2.2.0"
+async-stream = "0.3"
+anyhow = "1.0"
+log = "0.4"
+simple_logger = "1.11"

@@ -1,9 +1,9 @@
-use std::collections::HashMap;
 use scraper::{ElementRef, Selector};
+use std::collections::HashMap;
 use url::Url;
 
 #[derive(Debug, Clone)]
-pub struct Listing {
+pub struct AruodasListing {
     url: String,
     price: String,
     area: String,
@@ -11,14 +11,14 @@ pub struct Listing {
     price_per_area: f32,
 }
 
-pub struct Scraper;
+pub struct AruodasScraper;
 
-impl Scraper {
+impl AruodasScraper {
     pub fn new() -> Self {
         Self
     }
 
-    pub async fn scrape(&self, url: String, limit: Option<usize>) -> Vec<Listing> {
+    pub async fn scrape(&self, url: String, limit: Option<usize>) -> Vec<AruodasListing> {
         let mut next_listing_urls = Vec::<String>::new();
         let mut next_page_url = Some(Url::parse(&url).unwrap());
         let mut scrape_page: (Option<String>, Vec<String>);
@@ -30,31 +30,31 @@ impl Scraper {
             };
             next_listing_urls.append(&mut scrape_page.1);
             match limit {
-                None => {},
+                None => {}
                 Some(lim) => {
                     if next_listing_urls.len() >= lim {
                         println!("Stopping page scraping due to reached limit: {}", lim);
                         break;
                     }
-                },
+                }
             };
-        };
+        }
 
-        let mut listings = Vec::<Listing>::new();
+        let mut listings = Vec::<AruodasListing>::new();
         let mut parsed = 0;
         while let Some(next_listing_url) = next_listing_urls.pop() {
             listings.push(self.scrape_listing(next_listing_url).await);
             parsed += 1;
             match limit {
-                None => {},
+                None => {}
                 Some(lim) => {
                     if parsed >= lim {
                         println!("Stopping listing scraping due to reached limit: {}", lim);
                         break;
                     }
-                },
+                }
             }
-        };
+        }
 
         listings
     }
@@ -79,49 +79,62 @@ impl Scraper {
 
         let next_page_url = match document.select(&page_selector).next() {
             None => None,
-            Some(next_page) => {
-                match next_page.value().attr("href") {
-                    None => None,
-                    Some(href) => Some(href.to_string()),
-                }
+            Some(next_page) => match next_page.value().attr("href") {
+                None => None,
+                Some(href) => Some(href.to_string()),
             },
         };
 
         let mut listing_urls = Vec::<String>::new();
         for listing_url_element in document.select(&listing_selector) {
             match listing_url_element.value().attr("href") {
-                None => {continue;},
+                None => {
+                    continue;
+                }
                 Some(listing_url) => {
                     listing_urls.push(listing_url.to_string());
-                },
+                }
             }
-        };
+        }
 
         (next_page_url, listing_urls)
     }
 
     // Scrapes an individual listing
     // Returns a listing
-    pub async fn scrape_listing(&self, url: String) -> Listing {
+    pub async fn scrape_listing(&self, url: String) -> AruodasListing {
         // TODO: Keep these for as long as the struct lives, don't reinitialize it every time
         // scrape_listing is called
-        let table_selector = scraper::Selector::parse("body > div.main > div.content > div.main-content > div.obj-cont > dl")
-            .unwrap();
+        let table_selector = scraper::Selector::parse(
+            "body > div.main > div.content > div.main-content > div.obj-cont > dl",
+        )
+        .unwrap();
 
         println!("Parsing url {}", url);
 
         let body = reqwest::get(&url).await.unwrap().text().await.unwrap();
         let document = scraper::Html::parse_document(body.as_str());
 
-        let obj_details = self.parse_obj_details(
-            document.select(&table_selector).next().unwrap());
+        let obj_details = self.parse_obj_details(document.select(&table_selector).next().unwrap());
 
-        let price = obj_details.get("Kaina mėn.:").unwrap().replace(" €", "").replace(",", ".");
-        let area = obj_details.get("Plotas:").unwrap().replace(" m²", "").replace(",", ".");
-        let price_per_area = price.parse::<f32>().expect(&format!("Could not parse price to floating point: {}", price))
-            / area.parse::<f32>().expect(&format!("Could not parse area to floating point: {}", area));
+        let price = obj_details
+            .get("Kaina mėn.:")
+            .unwrap()
+            .replace(" €", "")
+            .replace(",", ".");
+        let area = obj_details
+            .get("Plotas:")
+            .unwrap()
+            .replace(" m²", "")
+            .replace(",", ".");
+        let price_per_area = price.parse::<f32>().expect(&format!(
+            "Could not parse price to floating point: {}",
+            price
+        )) / area
+            .parse::<f32>()
+            .expect(&format!("Could not parse area to floating point: {}", area));
 
-        Listing {
+        AruodasListing {
             url: url.clone(),
             price,
             area,
@@ -145,7 +158,7 @@ impl Scraper {
                 None => continue,
                 Some(dd) => obj_hash.insert(dt.1.clone(), dd.clone()),
             };
-        };
+        }
 
         obj_hash
     }
@@ -154,24 +167,24 @@ impl Scraper {
         let mut result = Vec::<String>::new();
         for el in element.select(selector) {
             result.push(
-                el
-                    .text()
+                el.text()
                     .collect::<String>()
                     .replace("\n", "")
                     .trim()
-                    .to_string());
-        };
+                    .to_string(),
+            );
+        }
 
         result
     }
 }
 
-pub fn sort_by_price_per_area(mut listings: Vec<Listing>) -> Vec<Listing> {
+pub fn sort_by_price_per_area(mut listings: Vec<AruodasListing>) -> Vec<AruodasListing> {
     let mut swapped = true;
     while swapped {
         swapped = false;
         for i in 1..listings.len() {
-            if listings[i].price_per_area > listings[i -1].price_per_area {
+            if listings[i].price_per_area > listings[i - 1].price_per_area {
                 swapped = true;
                 listings.swap(i - 1, i);
             }
