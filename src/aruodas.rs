@@ -4,11 +4,11 @@ use url::Url;
 
 #[derive(Debug, Clone)]
 pub struct AruodasListing {
-    url: String,
-    price: String,
-    area: String,
-    location: String,
-    price_per_area: f32,
+    pub url: String,
+    pub price: String,
+    pub area: String,
+    pub location: String,
+    pub price_per_area: f32,
 }
 
 pub struct AruodasScraper;
