@@ -1,7 +1,6 @@
 use log::SetLoggerError;
-use std::error::Error;
 use std::fmt::{Display, Formatter, Result};
-use std::option::NoneError;
+use std::error::Error;
 use url::ParseError;
 
 #[derive(Debug)]
@@ -15,12 +14,6 @@ impl Display for DiginetError {
 
 impl Error for DiginetError {}
 
-impl From<NoneError> for DiginetError {
-    fn from(_: NoneError) -> Self {
-        Self {}
-    }
-}
-
 impl From<()> for DiginetError {
     fn from(_: ()) -> Self {
         Self {}
@@ -33,8 +26,8 @@ impl From<anyhow::Error> for DiginetError {
     }
 }
 
-impl From<url::ParseError> for DiginetError {
-    fn from(_: url::ParseError) -> Self {
+impl From<ParseError> for DiginetError {
+    fn from(_: ParseError) -> Self {
         Self {}
     }
 }
