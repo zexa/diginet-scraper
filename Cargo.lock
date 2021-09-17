@@ -143,6 +143,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "common-scraper"
+version = "0.1.0"
+
+[[package]]
 name = "core-foundation"
 version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
