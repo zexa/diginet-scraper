@@ -30,4 +30,4 @@ SUBCOMMANDS:
 
 ```
 diginet-scraper aruodas https://www.aruodas.lt/butu-nuoma/vilniuje/\?FPriceMin\=200\&FPriceMax\=250
-```
+``` 
