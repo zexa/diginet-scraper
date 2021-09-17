@@ -2,7 +2,6 @@ use crate::error::DiginetError;
 use anyhow::Context;
 use log::info;
 use scraper::ElementRef;
-use std::borrow::Cow;
 use url::Url;
 
 #[derive(Debug)]
@@ -163,34 +162,41 @@ impl CvBankasScraper {
         let document = scraper::Html::parse_document(body.as_str());
         let description = document
             .select(&description_selector)
-            .next()?
+            .next()
+            .ok_or(DiginetError{})?
             .text()
             .collect();
         let name = document
             .select(&name_selector)
-            .next()?
+            .next()
+            .ok_or(DiginetError{})?
             .text()
-            .next()?
+            .next()
+            .ok_or(DiginetError{})?
             .to_string();
         let mut from = "0".to_string();
         let mut to = "0".to_string();
         let compensation_range = document
             .select(&compensation_range_selector)
-            .next()?
+            .next()
+            .ok_or(DiginetError{})?
             .text()
-            .next()?;
+            .next()
+            .ok_or(DiginetError{})?;
         if compensation_range.contains('-') {
             let mut compensation_range = compensation_range.split('-');
-            from = compensation_range.next()?.to_string();
-            to = compensation_range.next()?.to_string();
+            from = compensation_range.next().ok_or(DiginetError{})?.to_string();
+            to = compensation_range.next().ok_or(DiginetError{})?.to_string();
         } else if compensation_range.contains("Up to ") {
-            to = compensation_range.split("Up to ").next()?.to_string();
+            to = compensation_range.split("Up to ").next().ok_or(DiginetError{})?.to_string();
         }
         let compensation_type = match document
             .select(&compensation_type_selector)
-            .next()?
+            .next()
+            .ok_or(DiginetError{})?
             .text()
-            .next()?
+            .next()
+            .ok_or(DiginetError{})?
         {
             "Į rankas" => CompensationType::Net,
             "Net" => CompensationType::Net,

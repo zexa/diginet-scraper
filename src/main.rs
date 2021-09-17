@@ -1,5 +1,3 @@
-#![feature(try_trait)]
-
 extern crate clap;
 extern crate reqwest;
 extern crate scraper;
@@ -81,7 +79,7 @@ async fn main() -> Result<(), DiginetError> {
     }
 
     if let Some(cvbankas_matches) = matches.subcommand_matches("cvbankas") {
-        let url = Url::from_str(cvbankas_matches.value_of("url")?)?;
+        let url = Url::from_str(cvbankas_matches.value_of("url").ok_or(DiginetError{})?)?;
         println!("Initial page provided: {}", url);
         let limit: Option<usize> = match cvbankas_matches.value_of("limit") {
             None => None,
