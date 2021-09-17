@@ -5,7 +5,7 @@ authors = ["Zexa <zexa@cock.li>"]
 edition = "2018"
 
 [workspace]
-members = ["skelbiu-scraper"]
+members = ["skelbiu-lt-scraper"]
 
 [dependencies]
 clap = "2.33.3"
