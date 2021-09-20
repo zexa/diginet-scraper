@@ -10,8 +10,14 @@ I wrote diginet-lt-scraper because:
 * I wanted more control over the filtering provided by skelbiu.lt;
 * I wanted to write open source code that others would find useful.
 
+## Build
+```
+cargo build --release
+```
+
 ## Usage
 ```
+$ ./target/release/diginet-lt-scraper
 diginet-scraper 0.1.1
 Scrapes diginet.lt (autoplius.lt, aruodas.lt, skelbiu.lt, cvbankas.lt, paslaugos.lt, kainos.lt) listings
 
@@ -27,13 +33,3 @@ SUBCOMMANDS:
     cvbankas    Scrapes cvbankas listings
     help        Prints this message or the help of the given subcommand(s)
 ```
-
-## Usage aruodas
-1. Go to aruodas.lt
-2. Use their search to filter the listings
-3. Copy {url}
-4. Run `digine-scraper aruodas {url}`
-
-```
-diginet-scraper aruodas https://www.aruodas.lt/butu-nuoma/vilniuje/\?FPriceMin\=200\&FPriceMax\=250
-``` 

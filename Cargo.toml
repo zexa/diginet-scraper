@@ -1,8 +1,8 @@
 [package]
-name = "diginet-scraper"
+name = "diginet-lt-scraper"
 version = "0.1.1"
 authors = ["Zexa <zexa@cock.li>"]
-edition = "2018"
+edition = "2021"
 
 [workspace]
 members = ["skelbiu-lt-scraper", "common-scraper"]
