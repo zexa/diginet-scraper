@@ -1,19 +1,19 @@
-use crate::listing_stream::ListingStream;
 use crate::scraper_settings::ScraperSettings;
 use crate::semaphore_share::SemaphoreShare;
 use crate::semaphore_share_result::SemaphoreShareResult;
 use crate::{Listing, ListingScraper, PageScraper, PotentialListing};
+use std::sync::mpsc::{channel, Receiver};
 use std::sync::{Arc, Mutex};
 use std::thread;
+use std::thread::JoinHandle;
 use url::Url;
 
 pub trait Scraper<L>
 where
     L: 'static + Listing + std::marker::Send + Clone,
 {
-    fn scrape(&'static self, initial_url: Url) -> ListingStream<L>
+    fn scrape(&self, initial_url: Url) -> (Receiver<L>, Vec<JoinHandle<()>>)
     where
-        Self: 'static,
         Self: Sync,
         Self: std::marker::Send,
     {
@@ -42,9 +42,11 @@ where
             }));
         }
 
+        let (sender, receiver) = channel();
         let listing_mutex = Arc::new(Mutex::new(Vec::<L>::new()));
 
         for _ in 0u64..settings.get_threads() {
+            let sender = sender.clone();
             let listing_mutex = listing_mutex.clone();
             let potential_listing_share_mutex = potential_listing_share_mutex.clone();
             let listing_scraper = self.get_listing_scraper();
@@ -58,7 +60,7 @@ where
                             {
                                 loop {
                                     if let Ok(mut listings) = listing_mutex.lock() {
-                                        listings.push(listing.clone());
+                                        sender.send(listing);
                                         break;
                                     }
                                 }
@@ -70,7 +72,7 @@ where
             }));
         }
 
-        ListingStream::new(listing_mutex)
+        (receiver, handles)
     }
 
     fn get_page_scraper(&self) -> Box<dyn PageScraper>;
