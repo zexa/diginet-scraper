@@ -1,14 +1,14 @@
-use crate::{PotentialListing, PageScraper, PotentialListingStream};
-use futures::Stream;
+use crate::{PageScraper, PotentialListing};
 use url::Url;
 
-pub struct CommonPageScraper<'a> {
-    listing_selector: &'a str,
-    next_listing_page_selector: &'a str,
+#[derive(Clone)]
+pub struct CommonPageScraper {
+    listing_selector: String,
+    next_listing_page_selector: String,
 }
 
-impl<'a> CommonPageScraper<'a> {
-    pub fn new(listing_selector: &'a str, next_listing_page_selector: &'a str) -> Self {
+impl CommonPageScraper {
+    pub fn new(listing_selector: String, next_listing_page_selector: String) -> Self {
         Self {
             listing_selector,
             next_listing_page_selector,
@@ -16,8 +16,8 @@ impl<'a> CommonPageScraper<'a> {
     }
 }
 
-impl PageScraper for CommonPageScraper<'_> {
-    fn scrape_page(&self, page_url: &Url) -> (Vec<PotentialListing>, Option<Url>) {
+impl PageScraper for CommonPageScraper {
+    fn scrape_page(&self, _page_url: &Url) -> (Vec<PotentialListing>, Option<Url>) {
         todo!()
     }
 }

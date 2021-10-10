@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 common-scraper = { path = "../common-scraper" }
 futures = "0.3.17"
+url = "2.2.2"
