@@ -1,7 +1,7 @@
 use common_scraper::Listing;
 use url::Url;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SkelbiuLtListing;
 
 impl SkelbiuLtListing {

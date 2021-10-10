@@ -7,7 +7,7 @@ use common_scraper::{
 };
 use futures::Stream;
 
-struct SkelbiuLtScraper {
+pub struct SkelbiuLtScraper {
     scraper_settings: ScraperSettings,
 }
 
@@ -19,10 +19,12 @@ impl SkelbiuLtScraper {
 
 impl Scraper<SkelbiuLtListing> for SkelbiuLtScraper {
     fn get_page_scraper(&self) -> Box<dyn PageScraper> {
+        // TODO: Refactor this to use DI & clone
         Box::new(CommonPageScraper::new("".to_string(), "".to_string()))
     }
 
     fn get_listing_scraper(&self) -> Box<dyn ListingScraper<SkelbiuLtListing>> {
+        // TODO: Refactor this to use DI & clone
         Box::new(SkelbiuLtListingScraper::new())
     }
 
