@@ -1,43 +1,32 @@
-use common_scraper::{CommonPageScraper, PageScraper, ListingScraper, Scraper, Listing, PotentialListing};
-use crate::skelbiu_lt_query::SkelbiuLtQuery;
 use crate::skelbiu_lt_listing::SkelbiuLtListing;
-use futures::Stream;
 use crate::skelbiu_lt_listing_scraper::SkelbiuLtListingScraper;
+use crate::skelbiu_lt_query::SkelbiuLtQuery;
+use common_scraper::{
+    CommonPageScraper, Listing, ListingScraper, PageScraper, PotentialListing, Scraper,
+    ScraperSettings,
+};
+use futures::Stream;
 
 struct SkelbiuLtScraper {
-    page_scraper: Box<dyn PageScraper>,
-    listing_scraper: Box<dyn ListingScraper<SkelbiuLtListing>>,
+    scraper_settings: ScraperSettings,
 }
 
 impl SkelbiuLtScraper {
-    pub fn new(page_scraper: Box<dyn PageScraper>, listing_scraper: Box<dyn ListingScraper>) -> Self {
-        Self {
-            page_scraper,
-            listing_scraper
-        }
-    }
-}
-
-impl Default for SkelbiuLtScraper {
-    fn default() -> Self {
-        Self::new(
-            Box::new(CommonPageScraper::new(
-                "",
-                ""
-            )),
-            Box::new(SkelbiuLtListingScraper::new())
-        )
+    pub fn new(scraper_settings: ScraperSettings) -> Self {
+        Self { scraper_settings }
     }
 }
 
 impl Scraper<SkelbiuLtListing> for SkelbiuLtScraper {
-    type Query = SkelbiuLtQuery;
-
     fn get_page_scraper(&self) -> Box<dyn PageScraper> {
-        self.page_scraper.clone()
+        Box::new(CommonPageScraper::new("".to_string(), "".to_string()))
     }
 
     fn get_listing_scraper(&self) -> Box<dyn ListingScraper<SkelbiuLtListing>> {
-        self.page_scraper.clone()
+        Box::new(SkelbiuLtListingScraper::new())
+    }
+
+    fn get_scraper_settings(&self) -> &ScraperSettings {
+        &self.scraper_settings
     }
 }

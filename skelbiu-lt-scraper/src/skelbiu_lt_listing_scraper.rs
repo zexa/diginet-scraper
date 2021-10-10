@@ -1,5 +1,5 @@
-use common_scraper::{ListingScraper, PotentialListing, Listing};
 use crate::skelbiu_lt_listing::SkelbiuLtListing;
+use common_scraper::{Listing, ListingScraper, PotentialListing};
 
 pub struct SkelbiuLtListingScraper;
 
@@ -10,7 +10,7 @@ impl SkelbiuLtListingScraper {
 }
 
 impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
-    fn scrape_listing(&self, _potential_listing: &PotentialListing) -> SkelbiuLtListing {
-        todo!()
+    fn scrape_listing(&self, _potential_listing: &PotentialListing) -> Option<SkelbiuLtListing> {
+        Some(SkelbiuLtListing::new())
     }
 }
