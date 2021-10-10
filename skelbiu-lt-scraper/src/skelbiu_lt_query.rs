@@ -1,3 +1,5 @@
+use url::Url;
+
 pub struct SkelbiuLtQuery;
 
 impl SkelbiuLtQuery {
