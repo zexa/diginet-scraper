@@ -1,33 +1,74 @@
-use crate::{PageScraper, Listing, PotentialListing, ListingScraper, PotentialListingStream};
-use futures::{Stream, StreamExt, FutureExt};
-use std::sync::{Arc, Mutex};
 use crate::listing_stream::ListingStream;
+use crate::scraper_settings::ScraperSettings;
+use crate::semaphore_share::SemaphoreShare;
+use crate::semaphore_share_result::SemaphoreShareResult;
+use crate::{Listing, ListingScraper, PageScraper, PotentialListing};
+use std::sync::{Arc, Mutex};
+use std::thread;
 use url::Url;
 
-pub trait Scraper<L> where L: Listing + std::marker::Send {
-    fn scrape(&self, initial_url: Url) -> ListingStream<L> where Self: Sync {
-        let potential_listing_mutex = Arc::new(Mutex::new(Vec::<PotentialListing>::new()));
-        // tasks created using spawn can outlive the current function
-        // so the solution would be to move only the pieces that are needed here.
-        // might be for the best if we were to move
-        tokio::task::spawn(async {
-            let mut next_page: Option<Url> = Some(initial_url);
-            while let Some(page) = next_page.clone() {
-                let potential_listings: Vec<PotentialListing> = vec![];
-                (potential_listings, next_page) = self.get_page_scraper().scrape_page(&page);
-                potential_listing_mutex.lock().unwrap().append(&mut potential_listings);
-            }
-        });
+pub trait Scraper<L>
+where
+    L: 'static + Listing + std::marker::Send + Clone,
+{
+    fn scrape(&'static self, initial_url: Url) -> ListingStream<L>
+    where
+        Self: 'static,
+        Self: Sync,
+        Self: std::marker::Send,
+    {
+        let settings = self.get_scraper_settings();
+        let potential_listing_share_mutex =
+            Arc::new(Mutex::new(SemaphoreShare::<PotentialListing>::new()));
+        let mut handles = vec![];
 
-        let mut potential_listing_stream = PotentialListingStream::new(potential_listing_mutex);
+        {
+            let potential_listing_share_mutex = potential_listing_share_mutex.clone();
+            let page_scraper = self.get_page_scraper();
+            handles.push(thread::spawn(move || {
+                let mut next_page = Some(initial_url);
+                while let Some(page) = next_page {
+                    let mut scrape_result = page_scraper.scrape_page(&page);
+                    next_page = scrape_result.1;
+                    loop {
+                        if let Ok(mut potential_listing_share) =
+                            potential_listing_share_mutex.lock()
+                        {
+                            potential_listing_share.append(&mut scrape_result.0);
+                            break;
+                        }
+                    }
+                }
+            }));
+        }
+
         let listing_mutex = Arc::new(Mutex::new(Vec::<L>::new()));
-        tokio::task::spawn(async {
-            potential_listing_stream.then(|potential_listing| async move {
-                if let Some(listing) = self.get_listing_scraper().scrape_listing(&potential_listing) {
-                    listing_mutex.lock().unwrap().push(listing)
-                };
-            });
-        });
+
+        for _ in 0u64..settings.get_threads() {
+            let listing_mutex = listing_mutex.clone();
+            let potential_listing_share_mutex = potential_listing_share_mutex.clone();
+            let listing_scraper = self.get_listing_scraper();
+            handles.push(thread::spawn(move || loop {
+                if let Ok(mut potential_listing_share) = potential_listing_share_mutex.lock() {
+                    match potential_listing_share.get() {
+                        SemaphoreShareResult::Red => break,
+                        SemaphoreShareResult::Green(potential_listing) => {
+                            if let Some(listing) =
+                                listing_scraper.scrape_listing(&potential_listing)
+                            {
+                                loop {
+                                    if let Ok(mut listings) = listing_mutex.lock() {
+                                        listings.push(listing.clone());
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        SemaphoreShareResult::Yellow => continue,
+                    }
+                }
+            }));
+        }
 
         ListingStream::new(listing_mutex)
     }
@@ -35,4 +76,6 @@ pub trait Scraper<L> where L: Listing + std::marker::Send {
     fn get_page_scraper(&self) -> Box<dyn PageScraper>;
 
     fn get_listing_scraper(&self) -> Box<dyn ListingScraper<L>>;
+
+    fn get_scraper_settings(&self) -> &ScraperSettings;
 }

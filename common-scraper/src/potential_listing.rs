@@ -1,12 +1,13 @@
 use url::Url;
 
-pub struct PotentialListing<'a> {
-    listing_url: &'a Url,
-    listing_page_url: &'a Url,
+#[derive(Clone)]
+pub struct PotentialListing {
+    listing_url: Url,
+    listing_page_url: Url,
 }
 
-impl<'a> PotentialListing<'a> {
-    pub fn new(url: &'a Url, from_url: &'a Url) -> Self {
+impl<'a> PotentialListing {
+    pub fn new(url: Url, from_url: Url) -> Self {
         Self {
             listing_url: url,
             listing_page_url: from_url,
@@ -14,10 +15,10 @@ impl<'a> PotentialListing<'a> {
     }
 
     pub fn listing_url(&self) -> &Url {
-        self.listing_url
+        &self.listing_url
     }
 
     pub fn listing_page_url(&self) -> &Url {
-        self.listing_page_url
+        &self.listing_page_url
     }
 }
