@@ -33,6 +33,7 @@ impl CommonScrapper<SkelbiuLtListing> for SkelbiuLtScraper {
             "div[class='block']",
             ".bookmarks",
             ".cities",
+            ".value:not(.js-monthly-payment)",
         ))
     }
 
