@@ -6,15 +6,17 @@ pub struct SkelbiuLtListing {
     id: String,
     title: String,
     description: String,
+    views: String,
 }
 
 impl SkelbiuLtListing {
-    pub fn new(url: String, id: String, title: String, description: String) -> Self {
+    pub fn new(url: String, id: String, title: String, description: String, views: String) -> Self {
         Self {
             url,
             id,
             title,
             description,
+            views,
         }
     }
 
@@ -28,6 +30,10 @@ impl SkelbiuLtListing {
 
     pub fn get_description(&self) -> &str {
         &self.description
+    }
+
+    pub fn get_views(&self) -> &str {
+        &self.views
     }
 }
 

@@ -30,6 +30,7 @@ impl CommonScrapper<SkelbiuLtListing> for SkelbiuLtScraper {
             ".id".to_string(),
             "h1[itemprop=name]".to_string(),
             ".description".to_string(),
+            ".showed".to_string(),
         ))
     }
 
