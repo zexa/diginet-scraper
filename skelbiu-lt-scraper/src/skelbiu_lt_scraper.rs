@@ -1,11 +1,9 @@
 use crate::skelbiu_lt_listing::SkelbiuLtListing;
 use crate::skelbiu_lt_listing_scraper::SkelbiuLtListingScraper;
-use crate::skelbiu_lt_query::SkelbiuLtQuery;
 use common_scraper::{
-    CommonPageScraper, CommonScrapper, Listing, ListingScraper, PageScraper, PotentialListing,
+    CommonPageScraper, CommonScrapper, ListingScraper, PageScraper, PotentialListing,
     ScraperSettings,
 };
-use futures::Stream;
 
 pub struct SkelbiuLtScraper {
     scraper_settings: ScraperSettings,

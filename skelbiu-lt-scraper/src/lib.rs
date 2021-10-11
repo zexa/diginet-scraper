@@ -1,11 +1,9 @@
 mod skelbiu_lt_listing;
 mod skelbiu_lt_listing_scraper;
-mod skelbiu_lt_query;
 mod skelbiu_lt_scraper;
 
 pub use skelbiu_lt_listing::SkelbiuLtListing;
 pub use skelbiu_lt_listing_scraper::SkelbiuLtListingScraper;
-pub use skelbiu_lt_query::SkelbiuLtQuery;
 pub use skelbiu_lt_scraper::SkelbiuLtScraper;
 
 #[cfg(test)]
