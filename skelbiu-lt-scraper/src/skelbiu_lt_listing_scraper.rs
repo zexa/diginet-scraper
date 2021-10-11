@@ -12,6 +12,7 @@ pub struct SkelbiuLtListingScraper {
     liked_amount_selector: Selector,
     location_selector: Selector,
     quality_selector: Selector,
+    price_selector: Selector,
 }
 
 impl SkelbiuLtListingScraper {
@@ -24,6 +25,7 @@ impl SkelbiuLtListingScraper {
         liked_amount_selector: &str,
         location_selector: &str,
         quality_selector: &str,
+        price_selector: &str,
     ) -> Self {
         let id_selector = Selector::parse(id_selector).unwrap();
         let title_selector = Selector::parse(title_selector).unwrap();
@@ -33,6 +35,7 @@ impl SkelbiuLtListingScraper {
         let liked_amount_selector = Selector::parse(liked_amount_selector).unwrap();
         let location_selector = Selector::parse(location_selector).unwrap();
         let quality_selector = Selector::parse(quality_selector).unwrap();
+        let price_selector = Selector::parse(price_selector).unwrap();
 
         Self {
             id_selector,
@@ -43,6 +46,7 @@ impl SkelbiuLtListingScraper {
             liked_amount_selector,
             location_selector,
             quality_selector,
+            price_selector,
         }
     }
 }
@@ -126,6 +130,15 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
                 .trim()
                 .to_string();
 
+            let price = html
+                .select(&self.price_selector)
+                .next()
+                .unwrap()
+                .text()
+                .collect::<String>()
+                .trim()
+                .to_string();
+
             return Some(SkelbiuLtListing::new(
                 listing_url,
                 id,
@@ -136,6 +149,7 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
                 liked_amount,
                 location,
                 quality,
+                price,
             ));
         }
 

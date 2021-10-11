@@ -11,6 +11,7 @@ pub struct SkelbiuLtListing {
     liked_amount: String,
     location: String,
     quality: String,
+    price: String,
 }
 
 impl SkelbiuLtListing {
@@ -24,6 +25,7 @@ impl SkelbiuLtListing {
         liked_amount: String,
         location: String,
         quality: String,
+        price: String,
     ) -> Self {
         Self {
             url,
@@ -35,6 +37,7 @@ impl SkelbiuLtListing {
             liked_amount,
             location,
             quality,
+            price,
         }
     }
 
@@ -68,6 +71,10 @@ impl SkelbiuLtListing {
 
     pub fn get_quality(&self) -> &str {
         &self.quality
+    }
+
+    pub fn get_price(&self) -> &str {
+        &self.price
     }
 }
 
