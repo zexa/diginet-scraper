@@ -28,6 +28,7 @@ impl CommonScrapper<SkelbiuLtListing> for SkelbiuLtScraper {
         // TODO: Refactor this to use DI & clone
         Box::new(SkelbiuLtListingScraper::new(
             "h1[itemprop=name]".to_string(),
+            ".description".to_string(),
         ))
     }
 

@@ -4,11 +4,16 @@ use common_scraper::Listing;
 pub struct SkelbiuLtListing {
     url: String,
     title: String,
+    description: String,
 }
 
 impl SkelbiuLtListing {
-    pub fn new(url: String, title: String) -> Self {
-        Self { url, title }
+    pub fn new(url: String, title: String, description: String) -> Self {
+        Self {
+            url,
+            title,
+            description,
+        }
     }
 
     fn get_title(&self) -> &str {

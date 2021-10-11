@@ -4,13 +4,18 @@ use scraper::Selector;
 
 pub struct SkelbiuLtListingScraper {
     title_selector: Selector,
+    description_selector: Selector,
 }
 
 impl SkelbiuLtListingScraper {
-    pub fn new(title_selector: String) -> Self {
+    pub fn new(title_selector: String, description_selector: String) -> Self {
         let title_selector = Selector::parse(title_selector.as_str()).unwrap();
+        let description_selector = Selector::parse(description_selector.as_str()).unwrap();
 
-        Self { title_selector }
+        Self {
+            title_selector,
+            description_selector,
+        }
     }
 }
 
@@ -26,11 +31,19 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
                 .unwrap()
                 .text()
                 .collect::<String>()
-                .replace("\\n", "")
                 .trim()
                 .to_string();
 
-            return Some(SkelbiuLtListing::new(listing_url, title));
+            let description = html
+                .select(&self.description_selector)
+                .next()
+                .unwrap()
+                .text()
+                .collect::<String>()
+                .trim()
+                .to_string();
+
+            return Some(SkelbiuLtListing::new(listing_url, title, description));
         }
 
         None
