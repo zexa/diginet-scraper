@@ -39,34 +39,44 @@ where
                         }
                     }
                 }
+
+                loop {
+                    if let Ok(mut potential_listing_share) = potential_listing_share_mutex.lock() {
+                        potential_listing_share.set_has_reported_over(true);
+                        break;
+                    }
+                }
             }));
         }
 
         let (sender, receiver) = channel();
-        let listing_mutex = Arc::new(Mutex::new(Vec::<L>::new()));
 
-        for _ in 0u64..settings.get_threads() {
+        for thread_index in 0u64..settings.get_threads() {
             let sender = sender.clone();
-            let listing_mutex = listing_mutex.clone();
             let potential_listing_share_mutex = potential_listing_share_mutex.clone();
             let listing_scraper = self.get_listing_scraper();
             handles.push(thread::spawn(move || loop {
+                let mut potential_listing_option = None;
                 if let Ok(mut potential_listing_share) = potential_listing_share_mutex.lock() {
                     match potential_listing_share.get() {
-                        SemaphoreShareResult::Red => break,
-                        SemaphoreShareResult::Green(potential_listing) => {
-                            if let Some(listing) =
-                                listing_scraper.scrape_listing(&potential_listing)
-                            {
-                                loop {
-                                    if let Ok(mut listings) = listing_mutex.lock() {
-                                        sender.send(listing);
-                                        break;
-                                    }
-                                }
-                            }
+                        SemaphoreShareResult::Red => {
+                            println!("Found RED on thread {}", thread_index);
+                            break;
                         }
-                        SemaphoreShareResult::Yellow => continue,
+                        SemaphoreShareResult::Green(potential_listing) => {
+                            println!("Found GREEN on thread {}", thread_index);
+                            potential_listing_option = Some(potential_listing);
+                        }
+                        SemaphoreShareResult::Yellow => {
+                            println!("Found YELLOW on thread {}", thread_index);
+                            continue;
+                        }
+                    }
+                }
+
+                if let Some(potential_listing) = potential_listing_option {
+                    if let Some(listing) = listing_scraper.scrape_listing(&potential_listing) {
+                        sender.send(listing).unwrap();
                     }
                 }
             }));
