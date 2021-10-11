@@ -1,5 +1,3 @@
-use url::Url;
-
 pub trait Listing {
-    fn get_url(&self) -> &Url;
+    fn get_url(&self) -> &str;
 }

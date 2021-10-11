@@ -11,7 +11,7 @@ pub use skelbiu_lt_scraper::SkelbiuLtScraper;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use common_scraper::{Scraper, ScraperSettings};
+    use common_scraper::{CommonScrapper, ScraperSettings};
     use url::Url;
 
     #[test]
