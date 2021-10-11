@@ -1,6 +1,5 @@
 use crate::skelbiu_lt_listing::SkelbiuLtListing;
-use common_scraper::{Listing, ListingScraper, PotentialListing};
-use scraper::html::Select;
+use common_scraper::{ListingScraper, PotentialListing};
 use scraper::Selector;
 
 pub struct SkelbiuLtListingScraper {
@@ -14,19 +13,19 @@ pub struct SkelbiuLtListingScraper {
 
 impl SkelbiuLtListingScraper {
     pub fn new(
-        id_selector: String,
-        title_selector: String,
-        description_selector: String,
-        view_selector: String,
-        updated_at_selector: String,
-        liked_amount_selector: String,
+        id_selector: &str,
+        title_selector: &str,
+        description_selector: &str,
+        view_selector: &str,
+        updated_at_selector: &str,
+        liked_amount_selector: &str,
     ) -> Self {
-        let id_selector = Selector::parse(id_selector.as_str()).unwrap();
-        let title_selector = Selector::parse(title_selector.as_str()).unwrap();
-        let description_selector = Selector::parse(description_selector.as_str()).unwrap();
-        let view_selector = Selector::parse(view_selector.as_str()).unwrap();
-        let updated_at_selector = Selector::parse(updated_at_selector.as_str()).unwrap();
-        let liked_amount_selector = Selector::parse(liked_amount_selector.as_str()).unwrap();
+        let id_selector = Selector::parse(id_selector).unwrap();
+        let title_selector = Selector::parse(title_selector).unwrap();
+        let description_selector = Selector::parse(description_selector).unwrap();
+        let view_selector = Selector::parse(view_selector).unwrap();
+        let updated_at_selector = Selector::parse(updated_at_selector).unwrap();
+        let liked_amount_selector = Selector::parse(liked_amount_selector).unwrap();
 
         Self {
             id_selector,

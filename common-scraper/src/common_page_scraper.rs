@@ -9,9 +9,9 @@ pub struct CommonPageScraper {
 }
 
 impl CommonPageScraper {
-    pub fn new(listing_selector: String, next_page_selector: String) -> Self {
-        let listing_selector = scraper::Selector::parse(listing_selector.as_str()).unwrap();
-        let next_page_selector = scraper::Selector::parse(next_page_selector.as_str()).unwrap();
+    pub fn new(listing_selector: &str, next_page_selector: &str) -> Self {
+        let listing_selector = scraper::Selector::parse(listing_selector).unwrap();
+        let next_page_selector = scraper::Selector::parse(next_page_selector).unwrap();
 
         Self {
             listing_selector,
