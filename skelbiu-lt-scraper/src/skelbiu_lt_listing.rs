@@ -7,16 +7,25 @@ pub struct SkelbiuLtListing {
     title: String,
     description: String,
     views: String,
+    updated_at: String,
 }
 
 impl SkelbiuLtListing {
-    pub fn new(url: String, id: String, title: String, description: String, views: String) -> Self {
+    pub fn new(
+        url: String,
+        id: String,
+        title: String,
+        description: String,
+        views: String,
+        updated_at: String,
+    ) -> Self {
         Self {
             url,
             id,
             title,
             description,
             views,
+            updated_at,
         }
     }
 
@@ -34,6 +43,10 @@ impl SkelbiuLtListing {
 
     pub fn get_views(&self) -> &str {
         &self.views
+    }
+
+    pub fn get_updated_at(&self) -> &str {
+        &self.updated_at
     }
 }
 

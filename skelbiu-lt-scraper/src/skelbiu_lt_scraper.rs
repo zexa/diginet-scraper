@@ -31,6 +31,7 @@ impl CommonScrapper<SkelbiuLtListing> for SkelbiuLtScraper {
             "h1[itemprop=name]".to_string(),
             ".description".to_string(),
             ".showed".to_string(),
+            "div[class='block']".to_string(),
         ))
     }
 
