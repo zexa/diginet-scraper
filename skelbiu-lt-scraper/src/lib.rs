@@ -17,7 +17,7 @@ mod tests {
     #[test]
     fn it_works() {
         println!("Initializing test");
-        let scraper = SkelbiuLtScraper::new(ScraperSettings::new(1));
+        let scraper = SkelbiuLtScraper::new(ScraperSettings::new(3));
 
         let result = scraper.scrape(
             Url::parse("https://www.skelbiu.lt/skelbimai/?keywords=nvidia+gtx+1060").unwrap(),
