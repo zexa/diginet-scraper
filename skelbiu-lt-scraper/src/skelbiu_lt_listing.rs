@@ -1,6 +1,7 @@
 use common_scraper::Listing;
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SkelbiuLtListing {
     url: String,
     id: String,
