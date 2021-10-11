@@ -32,6 +32,7 @@ impl CommonScrapper<SkelbiuLtListing> for SkelbiuLtScraper {
             ".showed",
             "div[class='block']",
             ".bookmarks",
+            ".cities",
         ))
     }
 

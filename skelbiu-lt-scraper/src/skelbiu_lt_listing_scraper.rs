@@ -1,6 +1,7 @@
 use crate::skelbiu_lt_listing::SkelbiuLtListing;
 use common_scraper::{ListingScraper, PotentialListing};
 use scraper::Selector;
+use std::ops::Index;
 
 pub struct SkelbiuLtListingScraper {
     id_selector: Selector,
@@ -9,6 +10,7 @@ pub struct SkelbiuLtListingScraper {
     view_selector: Selector,
     updated_at_selector: Selector,
     liked_amount_selector: Selector,
+    location_selector: Selector,
 }
 
 impl SkelbiuLtListingScraper {
@@ -19,6 +21,7 @@ impl SkelbiuLtListingScraper {
         view_selector: &str,
         updated_at_selector: &str,
         liked_amount_selector: &str,
+        location_selector: &str,
     ) -> Self {
         let id_selector = Selector::parse(id_selector).unwrap();
         let title_selector = Selector::parse(title_selector).unwrap();
@@ -26,6 +29,7 @@ impl SkelbiuLtListingScraper {
         let view_selector = Selector::parse(view_selector).unwrap();
         let updated_at_selector = Selector::parse(updated_at_selector).unwrap();
         let liked_amount_selector = Selector::parse(liked_amount_selector).unwrap();
+        let location_selector = Selector::parse(location_selector).unwrap();
 
         Self {
             id_selector,
@@ -34,6 +38,7 @@ impl SkelbiuLtListingScraper {
             view_selector,
             updated_at_selector,
             liked_amount_selector,
+            location_selector,
         }
     }
 }
@@ -99,6 +104,15 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
                 .trim()
                 .replace("Įsimintas ", "");
 
+            let mut location = html
+                .select(&self.location_selector)
+                .next()
+                .unwrap()
+                .text()
+                .collect::<String>();
+            location.truncate(location.find("Siųsti siuntą vos nuo").unwrap());
+            location = location.trim().to_string();
+
             return Some(SkelbiuLtListing::new(
                 listing_url,
                 id,
@@ -107,6 +121,7 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
                 views,
                 updated_at,
                 liked_amount,
+                location,
             ));
         }
 
