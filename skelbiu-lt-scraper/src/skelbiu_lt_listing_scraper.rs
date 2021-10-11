@@ -3,16 +3,19 @@ use common_scraper::{Listing, ListingScraper, PotentialListing};
 use scraper::Selector;
 
 pub struct SkelbiuLtListingScraper {
+    id_selector: Selector,
     title_selector: Selector,
     description_selector: Selector,
 }
 
 impl SkelbiuLtListingScraper {
-    pub fn new(title_selector: String, description_selector: String) -> Self {
+    pub fn new(id_selector: String, title_selector: String, description_selector: String) -> Self {
+        let id_selector = Selector::parse(id_selector.as_str()).unwrap();
         let title_selector = Selector::parse(title_selector.as_str()).unwrap();
         let description_selector = Selector::parse(description_selector.as_str()).unwrap();
 
         Self {
+            id_selector,
             title_selector,
             description_selector,
         }
@@ -43,7 +46,17 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
                 .trim()
                 .to_string();
 
-            return Some(SkelbiuLtListing::new(listing_url, title, description));
+            let id = html
+                .select(&self.id_selector)
+                .next()
+                .unwrap()
+                .text()
+                .collect::<String>()
+                .replace("ID: ", "")
+                .trim()
+                .to_string();
+
+            return Some(SkelbiuLtListing::new(listing_url, id, title, description));
         }
 
         None

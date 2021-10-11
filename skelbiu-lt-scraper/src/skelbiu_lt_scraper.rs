@@ -27,6 +27,7 @@ impl CommonScrapper<SkelbiuLtListing> for SkelbiuLtScraper {
     fn get_listing_scraper(&self) -> Box<dyn ListingScraper<SkelbiuLtListing>> {
         // TODO: Refactor this to use DI & clone
         Box::new(SkelbiuLtListingScraper::new(
+            ".id".to_string(),
             "h1[itemprop=name]".to_string(),
             ".description".to_string(),
         ))
