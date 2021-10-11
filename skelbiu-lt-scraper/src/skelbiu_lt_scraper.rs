@@ -32,6 +32,7 @@ impl CommonScrapper<SkelbiuLtListing> for SkelbiuLtScraper {
             ".description".to_string(),
             ".showed".to_string(),
             "div[class='block']".to_string(),
+            ".bookmarks".to_string(),
         ))
     }
 

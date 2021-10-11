@@ -1,5 +1,6 @@
 use crate::skelbiu_lt_listing::SkelbiuLtListing;
 use common_scraper::{Listing, ListingScraper, PotentialListing};
+use scraper::html::Select;
 use scraper::Selector;
 
 pub struct SkelbiuLtListingScraper {
@@ -8,6 +9,7 @@ pub struct SkelbiuLtListingScraper {
     description_selector: Selector,
     view_selector: Selector,
     updated_at_selector: Selector,
+    liked_amount_selector: Selector,
 }
 
 impl SkelbiuLtListingScraper {
@@ -17,12 +19,14 @@ impl SkelbiuLtListingScraper {
         description_selector: String,
         view_selector: String,
         updated_at_selector: String,
+        liked_amount_selector: String,
     ) -> Self {
         let id_selector = Selector::parse(id_selector.as_str()).unwrap();
         let title_selector = Selector::parse(title_selector.as_str()).unwrap();
         let description_selector = Selector::parse(description_selector.as_str()).unwrap();
         let view_selector = Selector::parse(view_selector.as_str()).unwrap();
         let updated_at_selector = Selector::parse(updated_at_selector.as_str()).unwrap();
+        let liked_amount_selector = Selector::parse(liked_amount_selector.as_str()).unwrap();
 
         Self {
             id_selector,
@@ -30,6 +34,7 @@ impl SkelbiuLtListingScraper {
             description_selector,
             view_selector,
             updated_at_selector,
+            liked_amount_selector,
         }
     }
 }
@@ -86,6 +91,15 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
                 .trim()
                 .replace("Atnaujintas ", "");
 
+            let liked_amount = html
+                .select(&self.liked_amount_selector)
+                .next()
+                .unwrap()
+                .text()
+                .collect::<String>()
+                .trim()
+                .replace("Įsimintas ", "");
+
             return Some(SkelbiuLtListing::new(
                 listing_url,
                 id,
@@ -93,6 +107,7 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
                 description,
                 views,
                 updated_at,
+                liked_amount,
             ));
         }
 
