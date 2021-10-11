@@ -60,7 +60,7 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
             let title = html
                 .select(&self.title_selector)
                 .next()
-                .unwrap()
+                .unwrap_or_else(|| panic!("Could not find title for {}", &listing_url))
                 .text()
                 .collect::<String>()
                 .trim()
@@ -69,7 +69,7 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
             let description = html
                 .select(&self.description_selector)
                 .next()
-                .unwrap()
+                .unwrap_or_else(|| panic!("Could not find description for {}", &listing_url))
                 .text()
                 .collect::<String>()
                 .trim()
@@ -78,7 +78,7 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
             let id = html
                 .select(&self.id_selector)
                 .next()
-                .unwrap()
+                .unwrap_or_else(|| panic!("Could not find id for {}", &listing_url))
                 .text()
                 .collect::<String>()
                 .replace("ID: ", "")
@@ -88,7 +88,7 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
             let views = html
                 .select(&self.view_selector)
                 .next()
-                .unwrap()
+                .unwrap_or_else(|| panic!("Could not find views for {}", &listing_url))
                 .text()
                 .collect::<String>()
                 .trim()
@@ -97,7 +97,7 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
             let updated_at = html
                 .select(&self.updated_at_selector)
                 .next()
-                .unwrap()
+                .unwrap_or_else(|| panic!("Could not find updated_at for {}", &listing_url))
                 .text()
                 .collect::<String>()
                 .trim()
@@ -106,7 +106,7 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
             let liked_amount = html
                 .select(&self.liked_amount_selector)
                 .next()
-                .unwrap()
+                .unwrap_or_else(|| panic!("Could not find liked_amount for {}", &listing_url))
                 .text()
                 .collect::<String>()
                 .trim()
@@ -115,29 +115,23 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
             let mut location = html
                 .select(&self.location_selector)
                 .next()
-                .unwrap()
+                .unwrap_or_else(|| panic!("Could not find location for {}", &listing_url))
                 .text()
                 .collect::<String>();
             location.truncate(location.find("Siųsti siuntą vos nuo").unwrap());
             location = location.trim().to_string();
 
-            let quality = html
-                .select(&self.quality_selector)
-                .next()
-                .unwrap()
-                .text()
-                .collect::<String>()
-                .trim()
-                .to_string();
+            let quality = if let Some(quality) = html.select(&self.quality_selector).next() {
+                Some(quality.text().collect::<String>().trim().to_string())
+            } else {
+                None
+            };
 
-            let price = html
-                .select(&self.price_selector)
-                .next()
-                .unwrap()
-                .text()
-                .collect::<String>()
-                .trim()
-                .to_string();
+            let price = if let Some(price) = html.select(&self.price_selector).next() {
+                Some(price.text().collect::<String>().trim().to_string())
+            } else {
+                None
+            };
 
             return Some(SkelbiuLtListing::new(
                 listing_url,
