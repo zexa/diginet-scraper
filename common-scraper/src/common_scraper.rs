@@ -8,7 +8,7 @@ use std::thread;
 use std::thread::JoinHandle;
 use url::Url;
 
-pub trait Scraper<L>
+pub trait CommonScrapper<L>
 where
     L: 'static + Listing + std::marker::Send + Clone,
 {
@@ -28,7 +28,7 @@ where
             handles.push(thread::spawn(move || {
                 let mut next_page = Some(initial_url);
                 while let Some(page) = next_page {
-                    let mut scrape_result = page_scraper.scrape_page(&page);
+                    let mut scrape_result = page_scraper.scrape_page(page);
                     next_page = scrape_result.1;
                     loop {
                         if let Ok(mut potential_listing_share) =

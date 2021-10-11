@@ -9,3 +9,5 @@ edition = "2021"
 common-scraper = { path = "../common-scraper" }
 futures = "0.3.17"
 url = "2.2.2"
+reqwest = { version = "0.11.5", features = ["blocking"]}
+scraper = "0.12.0"
