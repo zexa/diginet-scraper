@@ -1,6 +1,6 @@
 use url::Url;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct PotentialListing {
     listing_url: Url,
     listing_page_url: Url,

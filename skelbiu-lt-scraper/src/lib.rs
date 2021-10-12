@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate slog;
+
 mod skelbiu_lt_listing;
 mod skelbiu_lt_listing_scraper;
 mod skelbiu_lt_scraper;

@@ -60,15 +60,15 @@ where
                 if let Ok(mut potential_listing_share) = potential_listing_share_mutex.lock() {
                     match potential_listing_share.get() {
                         SemaphoreShareResult::Red => {
-                            println!("Found RED on thread {}", thread_index);
+                            // println!("Found RED on thread {}", thread_index);
                             break;
                         }
                         SemaphoreShareResult::Green(potential_listing) => {
-                            println!("Found GREEN on thread {}", thread_index);
+                            // println!("Found GREEN on thread {}", thread_index);
                             potential_listing_option = Some(potential_listing);
                         }
                         SemaphoreShareResult::Yellow => {
-                            println!("Found YELLOW on thread {}", thread_index);
+                            // println!("Found YELLOW on thread {}", thread_index);
                             continue;
                         }
                     }

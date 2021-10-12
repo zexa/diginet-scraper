@@ -3,14 +3,19 @@ use crate::skelbiu_lt_listing_scraper::SkelbiuLtListingScraper;
 use common_scraper::{
     CommonPageScraper, CommonScrapper, ListingScraper, PageScraper, ScraperSettings,
 };
+use slog::Logger;
 
 pub struct SkelbiuLtScraper {
+    logger: Logger,
     scraper_settings: ScraperSettings,
 }
 
 impl SkelbiuLtScraper {
-    pub fn new(scraper_settings: ScraperSettings) -> Self {
-        Self { scraper_settings }
+    pub fn new(logger: Logger, scraper_settings: ScraperSettings) -> Self {
+        Self {
+            logger,
+            scraper_settings,
+        }
     }
 }
 
@@ -26,6 +31,7 @@ impl CommonScrapper<SkelbiuLtListing> for SkelbiuLtScraper {
     fn get_listing_scraper(&self) -> Box<dyn ListingScraper<SkelbiuLtListing>> {
         // TODO: Refactor this to use DI & clone
         Box::new(SkelbiuLtListingScraper::new(
+            self.logger.clone(),
             ".id",
             "h1[itemprop=name]",
             ".description",

@@ -1,9 +1,10 @@
 use crate::skelbiu_lt_listing::SkelbiuLtListing;
 use common_scraper::{ListingScraper, PotentialListing};
 use scraper::Selector;
-use std::ops::Index;
+use slog::Logger;
 
 pub struct SkelbiuLtListingScraper {
+    logger: Logger,
     id_selector: Selector,
     title_selector: Selector,
     description_selector: Selector,
@@ -17,6 +18,7 @@ pub struct SkelbiuLtListingScraper {
 
 impl SkelbiuLtListingScraper {
     pub fn new(
+        logger: Logger,
         id_selector: &str,
         title_selector: &str,
         description_selector: &str,
@@ -38,6 +40,7 @@ impl SkelbiuLtListingScraper {
         let price_selector = Selector::parse(price_selector).unwrap();
 
         Self {
+            logger,
             id_selector,
             title_selector,
             description_selector,
@@ -53,9 +56,14 @@ impl SkelbiuLtListingScraper {
 
 impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
     fn scrape_listing(&self, potential_listing: &PotentialListing) -> Option<SkelbiuLtListing> {
+        debug!(self.logger, "Started logging {:?}", &potential_listing);
+
         let listing_url = potential_listing.listing_url().to_string();
         if let Ok(response) = reqwest::blocking::get(&listing_url) {
+            debug!(self.logger, "Got response from {}", &listing_url);
+
             let html = scraper::Html::parse_document(response.text().unwrap().as_str());
+            debug!(self.logger, "Parsed html for {}", &listing_url);
 
             let title = html
                 .select(&self.title_selector)
@@ -65,6 +73,7 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
                 .collect::<String>()
                 .trim()
                 .to_string();
+            debug!(self.logger, "Found title for {}", &listing_url);
 
             let description = html
                 .select(&self.description_selector)
@@ -74,6 +83,7 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
                 .collect::<String>()
                 .trim()
                 .to_string();
+            debug!(self.logger, "Found description for {}", &listing_url);
 
             let id = html
                 .select(&self.id_selector)
@@ -84,6 +94,7 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
                 .replace("ID: ", "")
                 .trim()
                 .to_string();
+            debug!(self.logger, "Found id for {}", &listing_url);
 
             let views = html
                 .select(&self.view_selector)
@@ -93,6 +104,7 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
                 .collect::<String>()
                 .trim()
                 .to_string();
+            debug!(self.logger, "Found views for {}", &listing_url);
 
             let updated_at = html
                 .select(&self.updated_at_selector)
@@ -102,6 +114,7 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
                 .collect::<String>()
                 .trim()
                 .replace("Atnaujintas ", "");
+            debug!(self.logger, "Found updated_at for {}", &listing_url);
 
             let liked_amount = html
                 .select(&self.liked_amount_selector)
@@ -111,6 +124,7 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
                 .collect::<String>()
                 .trim()
                 .replace("Įsimintas ", "");
+            debug!(self.logger, "Found liked_amount for {}", &listing_url);
 
             let mut location = html
                 .select(&self.location_selector)
@@ -118,18 +132,29 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
                 .unwrap_or_else(|| panic!("Could not find location for {}", &listing_url))
                 .text()
                 .collect::<String>();
-            location.truncate(location.find("Siųsti siuntą vos nuo").unwrap());
+            if let Some(send_index) = location.find("Siųsti siuntą vos nuo") {
+                location.truncate(send_index);
+            }
             location = location.trim().to_string();
+            debug!(self.logger, "Found location for {}", &listing_url);
 
             let quality = if let Some(quality) = html.select(&self.quality_selector).next() {
+                debug!(self.logger, "Found quality for {}", &listing_url);
+
                 Some(quality.text().collect::<String>().trim().to_string())
             } else {
+                debug!(self.logger, "Could not find quality for {}", &listing_url);
+
                 None
             };
 
             let price = if let Some(price) = html.select(&self.price_selector).next() {
+                debug!(self.logger, "Found price for {}", &listing_url);
+
                 Some(price.text().collect::<String>().trim().to_string())
             } else {
+                debug!(self.logger, "Could not find price for {}", &listing_url);
+
                 None
             };
 
