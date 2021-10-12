@@ -85,15 +85,16 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
                 .to_string();
             debug!(self.logger, "Found description for {}", &listing_url);
 
-            let id = html
+            let mut id = html
                 .select(&self.id_selector)
                 .next()
                 .unwrap_or_else(|| panic!("Could not find id for {}", &listing_url))
                 .text()
-                .collect::<String>()
-                .replace("ID: ", "")
-                .trim()
-                .to_string();
+                .collect::<String>();
+            if let Some(id_pos) = id.find("ID: ") {
+                id = (&id[id_pos..]).replace("ID: ", "");
+            }
+            id.trim().to_string();
             debug!(self.logger, "Found id for {}", &listing_url);
 
             let views = html
