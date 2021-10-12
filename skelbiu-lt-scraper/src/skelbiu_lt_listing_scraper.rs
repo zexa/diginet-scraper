@@ -100,7 +100,7 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
             if let Some(id_pos) = id.find("ID: ") {
                 id = (&id[id_pos..]).replace("ID: ", "");
             }
-            id.trim().to_string();
+            id = id.trim().to_string();
             debug!(self.logger, "Found id for {}", &listing_url);
 
             let views = html
