@@ -19,9 +19,9 @@ impl<T> SemaphoreShare<T> {
         self.storage.append(items)
     }
 
-    pub fn push(&mut self, item: T) {
-        self.storage.push(item);
-    }
+    // pub fn push(&mut self, item: T) {
+    //     self.storage.push(item);
+    // }
 
     pub fn get(&mut self) -> SemaphoreShareResult<T> {
         match self.storage.pop() {

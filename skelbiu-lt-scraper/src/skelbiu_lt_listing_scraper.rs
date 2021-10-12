@@ -1,6 +1,6 @@
 use crate::skelbiu_lt_listing::SkelbiuLtListing;
 use common_scraper::{ListingScraper, PotentialListing};
-use scraper::{ElementRef, Selector};
+use scraper::Selector;
 use slog::Logger;
 
 pub struct SkelbiuLtListingScraper {
