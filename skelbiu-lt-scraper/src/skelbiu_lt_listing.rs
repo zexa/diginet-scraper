@@ -13,6 +13,7 @@ pub struct SkelbiuLtListing {
     location: String,
     quality: Option<String>,
     price: Option<String>,
+    price_change: Option<String>,
 }
 
 impl SkelbiuLtListing {
@@ -27,6 +28,7 @@ impl SkelbiuLtListing {
         location: String,
         quality: Option<String>,
         price: Option<String>,
+        price_change: Option<String>,
     ) -> Self {
         Self {
             url,
@@ -39,6 +41,7 @@ impl SkelbiuLtListing {
             location,
             quality,
             price,
+            price_change,
         }
     }
 
@@ -76,6 +79,10 @@ impl SkelbiuLtListing {
 
     pub fn get_price(&self) -> &Option<String> {
         &self.price
+    }
+
+    pub fn get_price_change(&self) -> &Option<String> {
+        &self.price_change
     }
 }
 

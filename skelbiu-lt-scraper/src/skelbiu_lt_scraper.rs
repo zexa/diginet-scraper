@@ -41,6 +41,7 @@ impl CommonScrapper<SkelbiuLtListing> for SkelbiuLtScraper {
             ".cities",
             ".value:not(.js-monthly-payment)",
             ".price",
+            ".price-changes",
         ))
     }
 

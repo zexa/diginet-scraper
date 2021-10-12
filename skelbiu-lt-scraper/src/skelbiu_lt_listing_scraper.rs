@@ -14,6 +14,7 @@ pub struct SkelbiuLtListingScraper {
     location_selector: Selector,
     quality_selector: Selector,
     price_selector: Selector,
+    price_change_selector: Selector,
 }
 
 impl SkelbiuLtListingScraper {
@@ -28,6 +29,7 @@ impl SkelbiuLtListingScraper {
         location_selector: &str,
         quality_selector: &str,
         price_selector: &str,
+        price_change_selector: &str,
     ) -> Self {
         let id_selector = Selector::parse(id_selector).unwrap();
         let title_selector = Selector::parse(title_selector).unwrap();
@@ -38,6 +40,7 @@ impl SkelbiuLtListingScraper {
         let location_selector = Selector::parse(location_selector).unwrap();
         let quality_selector = Selector::parse(quality_selector).unwrap();
         let price_selector = Selector::parse(price_selector).unwrap();
+        let price_change_selector = Selector::parse(price_change_selector).unwrap();
 
         Self {
             logger,
@@ -50,6 +53,7 @@ impl SkelbiuLtListingScraper {
             location_selector,
             quality_selector,
             price_selector,
+            price_change_selector,
         }
     }
 }
@@ -165,6 +169,22 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
                 None
             };
 
+            let price_change = match html.select(&self.price_change_selector).next() {
+                Some(price_change) => {
+                    debug!(self.logger, "Found price_change for {}", &listing_url);
+
+                    Some(price_change.text().collect::<String>().trim().to_string())
+                }
+                None => {
+                    debug!(
+                        self.logger,
+                        "Could not find price_change for {}", &listing_url
+                    );
+
+                    None
+                }
+            };
+
             return Some(SkelbiuLtListing::new(
                 listing_url,
                 id,
@@ -176,6 +196,7 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
                 location,
                 quality,
                 price,
+                price_change,
             ));
         }
 
