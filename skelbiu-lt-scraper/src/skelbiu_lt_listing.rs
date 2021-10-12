@@ -6,7 +6,7 @@ pub struct SkelbiuLtListing {
     url: String,
     id: String,
     title: String,
-    description: String,
+    description: Option<String>,
     views: String,
     updated_at: String,
     liked_amount: String,
@@ -20,7 +20,7 @@ impl SkelbiuLtListing {
         url: String,
         id: String,
         title: String,
-        description: String,
+        description: Option<String>,
         views: String,
         updated_at: String,
         liked_amount: String,
@@ -50,7 +50,7 @@ impl SkelbiuLtListing {
         &self.title
     }
 
-    pub fn get_description(&self) -> &str {
+    pub fn get_description(&self) -> &Option<String> {
         &self.description
     }
 

@@ -1,6 +1,6 @@
 use crate::skelbiu_lt_listing::SkelbiuLtListing;
 use common_scraper::{ListingScraper, PotentialListing};
-use scraper::Selector;
+use scraper::{ElementRef, Selector};
 use slog::Logger;
 
 pub struct SkelbiuLtListingScraper {
@@ -75,15 +75,21 @@ impl ListingScraper<SkelbiuLtListing> for SkelbiuLtListingScraper {
                 .to_string();
             debug!(self.logger, "Found title for {}", &listing_url);
 
-            let description = html
-                .select(&self.description_selector)
-                .next()
-                .unwrap_or_else(|| panic!("Could not find description for {}", &listing_url))
-                .text()
-                .collect::<String>()
-                .trim()
-                .to_string();
-            debug!(self.logger, "Found description for {}", &listing_url);
+            let description = match html.select(&self.description_selector).next() {
+                None => {
+                    debug!(
+                        self.logger,
+                        "Could not find description for {}", &listing_url
+                    );
+
+                    None
+                }
+                Some(description) => {
+                    debug!(self.logger, "Found description for {}", &listing_url);
+
+                    Some(description.text().collect::<String>().trim().to_string())
+                }
+            };
 
             let mut id = html
                 .select(&self.id_selector)
