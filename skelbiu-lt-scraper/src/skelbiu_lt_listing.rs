@@ -1,7 +1,8 @@
 use common_scraper::Listing;
+use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
 pub struct SkelbiuLtListing {
     url: String,
     id: String,
