@@ -1,5 +1,6 @@
 use crate::{PageScraper, PotentialListing};
 use scraper::Selector;
+use tracing::{span, Level};
 use url::Url;
 
 #[derive(Clone)]
@@ -22,6 +23,9 @@ impl CommonPageScraper {
 
 impl PageScraper for CommonPageScraper {
     fn scrape_page(&self, page_url: Url) -> (Vec<PotentialListing>, Option<Url>) {
+        let span = span!(Level::DEBUG, "common-page-scraper", ?page_url);
+        let _enter = span.enter();
+
         // TODO: Should not unwrap if possible
         let result = reqwest::blocking::get(page_url.to_string()).unwrap();
         let html = scraper::Html::parse_document(result.text().unwrap().as_str());

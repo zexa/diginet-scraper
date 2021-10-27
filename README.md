@@ -10,6 +10,11 @@ I wrote diginet-lt-scraper because:
 * I wanted more control over the filtering provided by skelbiu.lt;
 * I wanted to write open source code that others would find useful.
 
+## Disclaimer
+* diginet-lt-scraper is in its early development stages. Breaking API changes are to be expected.
+* Not all diginet services are currently available for scraping. We are still working on a proper abstraction. 
+* versioning is currently not a concert - if you want to use the scraper - fork it or use a specific commit hash.
+
 ## Build
 ```
 cargo build --release

@@ -4,5 +4,5 @@ pub trait ListingScraper<L>: Send
 where
     L: Listing,
 {
-    fn scrape_listing(&self, _potential_listing: &PotentialListing) -> Option<L>;
+    fn scrape_listing(&self, potential_listing: &PotentialListing) -> Option<L>;
 }

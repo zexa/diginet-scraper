@@ -12,7 +12,7 @@ pub trait CommonScrapper<L>
 where
     L: 'static + Listing + std::marker::Send + Clone,
 {
-    fn scrape(&self, initial_url: Url) -> (Receiver<L>, Vec<JoinHandle<()>>)
+    fn scrape_page(&self, initial_url: Url) -> (Receiver<L>, Vec<JoinHandle<()>>)
     where
         Self: Sync,
         Self: std::marker::Send,

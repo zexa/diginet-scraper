@@ -1,6 +1,3 @@
-#[macro_use]
-extern crate slog;
-
 mod skelbiu_lt_listing;
 mod skelbiu_lt_listing_scraper;
 mod skelbiu_lt_scraper;
@@ -20,7 +17,7 @@ mod tests {
         println!("Initializing test");
         let scraper = SkelbiuLtScraper::new(ScraperSettings::new(3));
 
-        let result = scraper.scrape(
+        let result = scraper.scrape_page(
             Url::parse("https://www.skelbiu.lt/skelbimai/?keywords=nvidia+gtx+1060").unwrap(),
         );
 
